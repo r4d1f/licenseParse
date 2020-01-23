@@ -69,7 +69,7 @@ if __name__ == '__main__':
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     driver = webdriver.Chrome(os.getcwd() + "/chromedriver.exe",chrome_options=options)
-    wait = ui.WebDriverWait(driver,30)
+    wait = ui.WebDriverWait(driver,10)
 
     dont_working_urls, count = f(newzip,driver,wait)
     print('dont working urls = ', dont_working_urls, '(', len(dont_working_urls), ')', "\ncount parsed url = ", count)
