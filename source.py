@@ -5,7 +5,7 @@ import datetime
 from multiprocessing import Pool
 import requests
 import traceback
-import address
+import address_split
 
 def get_data(url):
     dont_working_urls = []
@@ -39,9 +39,9 @@ def get_data(url):
                 key = tds[0]
                 value = tds[1]
                 data[key] = value
+        data["Места осуществления образовательной деятельности"] = address_split.f(data["Места осуществления образовательной деятельности"])
     except:
         data["Места осуществления образовательной деятельности"] = ''
-    data["Места осуществления образовательной деятельности"] = address.f(data["Места осуществления образовательной деятельности"])
     return data
     
 i = 0
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    with open('file1000.txt', 'r') as f:
+    with open('file.txt', 'r') as f:
         urls = f.read().splitlines()
     fields = ["ОГРН", "ИНН", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Место нахождения организации", "Места осуществления образовательной деятельности"]
