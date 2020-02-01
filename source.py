@@ -41,7 +41,10 @@ def get_data(url):
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = address_split.f(data["Места осуществления образовательной деятельности"])
     except:
+        #print('Ошибка:\n', traceback.format_exc())
         data["Места осуществления образовательной деятельности"] = ''
+    if (len(dont_working_urls) != 0):
+        print(dont_working_urls)
     return data
     
 i = 0
@@ -49,7 +52,7 @@ def make_all(url):
     global i
     res = get_data(url)
     i+= 1
-    print(i)
+    #print(i)
     return res
 
 if __name__ == '__main__':  
@@ -61,9 +64,11 @@ if __name__ == '__main__':
         urls = f.read().splitlines()
     fields = ["ОГРН", "ИНН", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Место нахождения организации", "Места осуществления образовательной деятельности"]
-    row = 0
+    row = 1
     col = 0
     count = 0
+    for i in range(len(fields)):
+        worksheet.write(0, i, fields[i])
     with Pool(40) as p:
         for result in p.map(make_all, urls):
             count += 1
