@@ -6,6 +6,18 @@ from multiprocessing import Pool
 import requests
 import traceback
 import address_split
+import json
+import re
+
+def json_parse(name = 'dataObrnadzor.json'):
+    with open(name, encoding="utf8") as f:
+        templates = json.load(f)
+
+    arr = []
+    for i in range(len(templates)):
+        arr.append(templates[i]['guid'])
+    return arr
+
 
 def get_data(url):
     dont_working_urls = []
@@ -21,6 +33,8 @@ def get_data(url):
                 (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Место нахождения организации"):
                 key = tds[0]
                 value = tds[1]
+                if (key == "Место нахождения организации" and len(re.findall(r'\d{4,9}', value.split(',')[0].replace(" ", ""))) == 0):
+                    value = address_split.swap(value)
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = ''
     except:
@@ -60,8 +74,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    with open('file.txt', 'r') as f:
-        urls = f.read().splitlines()
+    urls = json_parse()[:100]
     fields = ["ОГРН", "ИНН", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1
@@ -77,9 +90,9 @@ if __name__ == '__main__':
                     worksheet.write(row, col, result[i])
                 except:
                     print(result)
+
                 col += 1
             row += 1
             col = 0
     print('Done!, count urls = ', count, '\nStart: ', start, '\nEnd: ', datetime.datetime.now())
     workbook.close()
-    f.close()
