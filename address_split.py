@@ -33,7 +33,7 @@ def split_home(address):
         curr_address = address_arr[i]
         if curr_address[0:4].isdigit() == False:
             curr_address = swap(curr_address)
-        pattern_1 = re.compile(r'д\.\s*\S*,*|дом\s*\S*,*')
+        pattern_1 = re.compile(r'д\.\s*\d+,*|дом\s*\d+,*|д\. № \d*,*|дом № \d*,*')
         pattern_2 = re.compile(r',\s*\d+')
         house_arr = re.findall(pattern_1, curr_address)
         num_arr = re.findall(pattern_2, curr_address)
