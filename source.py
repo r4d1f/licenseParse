@@ -74,7 +74,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()[:100]
+    urls = json_parse()[:250]
     fields = ["ОГРН", "ИНН", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1
@@ -90,7 +90,6 @@ if __name__ == '__main__':
                     worksheet.write(row, col, result[i])
                 except:
                     print(result)
-
                 col += 1
             row += 1
             col = 0
