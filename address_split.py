@@ -111,7 +111,7 @@ def f(address):
         tmp_address = ''
         for i in range(len(address_arr)):
             curr_address = address_arr[i]
-            pattern = re.compile(r'ул\.\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,')
+            pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,')
             street_arr = re.findall(pattern, curr_address)
             if (len(street_arr) > 1):
                 l = curr_address[curr_address.find(street_arr[-1]):]
