@@ -20,7 +20,6 @@ def json_parse(name = 'dataObrnadzor.json'):
 
 
 def get_data(url):
-    dont_working_urls = []
     data = dict()
     try:
         page1 = requests.get("http://isga.obrnadzor.gov.ru/rlic/details/" + url + "/") 
@@ -29,8 +28,8 @@ def get_data(url):
         for tr in table1:
             tds = tr.find_all("td")   
             tds = [ele.text.strip() for ele in tds]
-            if (tds[0] == "ОГРН") | (tds[0] == "ИНН") | (tds[0] == "Полное наименование организации (ФИО индивидуального предпринимателя)") |\
-                (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Место нахождения организации"):
+            if (tds[0] == "ОГРН") | (tds[0] == "ИНН") | (tds[0] == "КПП") | (tds[0] == "Полное наименование организации (ФИО индивидуального предпринимателя)") |\
+                (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Субьект РФ") | (tds[0] == "Место нахождения организации"):
                 key = tds[0]
                 value = tds[1]
                 if (key == "Место нахождения организации" and len(re.findall(r'\d{4,9}', value.split(',')[0].replace(" ", ""))) == 0):
@@ -38,7 +37,10 @@ def get_data(url):
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = ''
     except:
-        dont_working_urls.append(url)
+        with open("dont_working_urls.txt", "a+") as f:
+            print("Ошибка! Не удалось открыть: http://isga.obrnadzor.gov.ru/rlic/details/" + url + "/")
+            f.write(url)
+            f.write("\n")
         return
         
     try:
@@ -54,44 +56,60 @@ def get_data(url):
                 value = tds[1]
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = address_split.f(data["Места осуществления образовательной деятельности"])
-    except:
-        #print('Ошибка:\n', traceback.format_exc())
+    except TypeError:
         data["Места осуществления образовательной деятельности"] = ''
-    if (len(dont_working_urls) != 0):
-        print(dont_working_urls)
+    except AttributeError:
+        #print(url)
+        print('Ошибка:\n', traceback.format_exc())
+    except:
+        print('Ошибка:\n', traceback.format_exc())
     return data
     
-i = 0
 def make_all(url):
-    global i
     res = get_data(url)
-    i+= 1
-    #print(i)
     return res
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
+    file = open("dont_working_urls.txt", "w")
+    file.close()
+
     start = datetime.datetime.now()
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()[:250]
-    fields = ["ОГРН", "ИНН", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
-    "Сокращенное наименование организации", "Место нахождения организации", "Места осуществления образовательной деятельности"]
+    urls = json_parse()[:500]
+    fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
+    "Сокращенное наименование организации", "Субьект РФ", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1
     col = 0
     count = 0
     for i in range(len(fields)):
         worksheet.write(0, i, fields[i])
-    with Pool(40) as p:
-        for result in p.map(make_all, urls):
-            count += 1
-            for i in fields:
-                try:
-                    worksheet.write(row, col, result[i])
-                except:
-                    print(result)
-                col += 1
-            row += 1
-            col = 0
+    while True:
+        with Pool(40) as p:
+            for result in p.map(make_all, urls):
+                count += 1
+                for i in fields:
+                    try:
+                        worksheet.write(row, col, result[i])
+                    except:
+                        row -= 1
+                        count -= 1
+                        #print(result)
+                    col += 1
+                row += 1
+                col = 0
+        file = open("dont_working_urls.txt", "r")
+        file_data = file.read().splitlines()
+        if len(file_data) != 0:
+            urls = file_data
+            file.close()
+            file = open("dont_working_urls.txt", "w")
+            file.close()
+        else:
+            file.close()
+            break
+
+
     print('Done!, count urls = ', count, '\nStart: ', start, '\nEnd: ', datetime.datetime.now())
     workbook.close()
