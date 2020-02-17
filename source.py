@@ -8,6 +8,8 @@ import traceback
 import address_split
 import json
 import re
+from itertools import groupby
+
 
 def json_parse(name = 'dataObrnadzor.json'):
     with open(name, encoding="utf8") as f:
@@ -18,6 +20,16 @@ def json_parse(name = 'dataObrnadzor.json'):
         arr.append(templates[i]['guid'])
     return arr
 
+def unique(items):
+    found = set([])
+    keep = []
+
+    for item in items:
+        if item not in found:
+            found.add(item)
+            keep.append(item)
+
+    return keep
 
 def get_data(url):
     data = dict()
@@ -28,6 +40,8 @@ def get_data(url):
         for tr in table1:
             tds = tr.find_all("td")   
             tds = [ele.text.strip() for ele in tds]
+            if (tds[0] == "Текущий статус лицензии" and tds[1] == "Не действует"): #start1
+                continue    #end1
             if (tds[0] == "ОГРН") | (tds[0] == "ИНН") | (tds[0] == "КПП") | (tds[0] == "Полное наименование организации (ФИО индивидуального предпринимателя)") |\
                 (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Субьект РФ") | (tds[0] == "Место нахождения организации"):
                 key = tds[0]
@@ -44,19 +58,34 @@ def get_data(url):
         return
         
     try:
-        url_to_full_address = soup1.find("tr",{"class": "clickable"})['data-target']
-        page2 = requests.get("http://isga.obrnadzor.gov.ru/rlic/supplement/" + url_to_full_address + "/")
-        soup2 = BeautifulSoup(page2.text, "lxml")
-        table2 = soup2.find("table", {"class": "table table-bordered cells-centered"}).find("tbody").find_all("tr")
-        for tr in table2:
-            tds = tr.find_all("td")   
-            tds = [ele.text.strip() for ele in tds]
-            if tds[0] == "Места осуществления образовательной деятельности":
-                key = tds[0]
-                value = tds[1]
-                data[key] = value
-        data["Места осуществления образовательной деятельности"] = address_split.f(data["Места осуществления образовательной деятельности"])
+        license_arr = soup1.find_all("tr",{"class": "clickable"})
+        mood = []   #Место осуществления образовательной деятельности
+        for lic in license_arr:
+            if (lic.find_all("td")[3].text == "Действует"):
+                url_to_full_address = lic["data-target"]
+                page2 = requests.get("http://isga.obrnadzor.gov.ru/rlic/supplement/" + url_to_full_address + "/")
+                soup2 = BeautifulSoup(page2.text, "lxml")
+                table2 = soup2.find("table", {"class": "table table-bordered cells-centered"}).find("tbody").find_all("tr")
+                for tr in table2:
+                    tds = tr.find_all("td")
+                    tds_text = [ele.text.strip() for ele in tds]
+                    if tds_text[0] == "Места осуществления образовательной деятельности":
+                        if ("<br>" in tds[1]):
+                            mood += tds[1].split("<br>")
+                        else:
+                            mood.append(tds_text[1])
+        mood = unique(mood)
+        for i in mood:
+            data["Места осуществления образовательной деятельности"] += i
+
+        mood = (address_split.f(data["Места осуществления образовательной деятельности"])).split(";")
+        mood = unique(mood)
+        data["Места осуществления образовательной деятельности"] = ''
+        for i in mood:
+            data["Места осуществления образовательной деятельности"] += i + ";"
+        data["Места осуществления образовательной деятельности"] = data["Места осуществления образовательной деятельности"][:-1]
     except TypeError:
+        print('Ошибка:\n', traceback.format_exc())
         data["Места осуществления образовательной деятельности"] = ''
     except AttributeError:
         #print(url)
