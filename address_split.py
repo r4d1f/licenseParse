@@ -34,7 +34,7 @@ def split_home(address):
         if (curr_address[0:4].isdigit() == False) & (index_arr != []):
             curr_address = swap(curr_address)
         pattern_1 = re.compile(r'д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*')
-        pattern_2 = re.compile(r',\s*\d+')
+        pattern_2 = re.compile(r',\s*\d+|,\s*№\s*\d+')
         pattern_3 = re.compile(r',\s*\d+[а-яА-Я]+')
         house_arr = re.findall(pattern_1, curr_address)
         num_arr = re.findall(pattern_2, curr_address)
@@ -55,7 +55,7 @@ def split_home(address):
                 k = 1
                 while template[-k].isdigit():
                     k += 1
-                tmp_address += template.strip(' ,') + ';'
+                tmp_address += template + ';'
                 for j in range(len(num_arr) - 1):
                     tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])]
                     tmp_address = tmp_address.strip(' ,') + ';'
@@ -69,10 +69,12 @@ def split_home(address):
                 k = 1
                 while template[-k].isdigit():
                     k += 1
+                if k != 1:
+                    template = template[:-k]
                 for j in range(len(num_arr) - 1):
-                    tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])] 
+                    tmp_address += template + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])] 
                     tmp_address = tmp_address.strip(' ,') + ';'
-                tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[-1])+1:] 
+                tmp_address += template + curr_address[curr_address.find(num_arr[-1])+1:] 
                 tmp_address = tmp_address.strip(' ,') + ';'
             else:
                 tmp_address += curr_address.strip(' ,') + ';'   
@@ -86,7 +88,7 @@ def split_home(address):
                 k = 2
                 while template[-k].isdigit():
                     k += 1
-                tmp_address += template.strip(' ,') + ';'
+                tmp_address += template + ';'
                 for j in range(len(num_letter_arr) - 1):
                     tmp_address += template[:-k+1] + curr_address[curr_address.find(num_letter_arr[j])+1:curr_address.find(num_letter_arr[j+1])] 
                     tmp_address = tmp_address.strip(' ,') + ';'
