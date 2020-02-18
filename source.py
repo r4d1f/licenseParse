@@ -31,6 +31,13 @@ def unique(items):
 
     return keep
 
+def asplit(address):
+    res = ''
+    address_arr = address.split(";")
+    for i in address_arr:
+        res += address_split.f(i)
+    return res
+
 def get_data(url):
     data = dict()
     try:
@@ -46,8 +53,8 @@ def get_data(url):
                 (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Субьект РФ") | (tds[0] == "Место нахождения организации"):
                 key = tds[0]
                 value = tds[1]
-                if (key == "Место нахождения организации" and len(re.findall(r'\d{4,9}', value.split(',')[0].replace(" ", ""))) == 0):
-                    value = address_split.swap(value)
+                '''if (key == "Место нахождения организации" and len(re.findall(r'\d{4,9}', value.split(',')[0].replace(" ", ""))) == 0):
+                                                                    value = address_split.swap(value)'''
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = ''
     except:
@@ -60,6 +67,7 @@ def get_data(url):
     try:
         license_arr = soup1.find_all("tr",{"class": "clickable"})
         mood = []   #Место осуществления образовательной деятельности
+        mno = []    #Место нахождения организации
         for lic in license_arr:
             if (lic.find_all("td")[3].text == "Действует"):
                 url_to_full_address = lic["data-target"]
@@ -69,16 +77,24 @@ def get_data(url):
                 for tr in table2:
                     tds = tr.find_all("td")
                     tds_text = [ele.text.strip() for ele in tds]
-                    if tds_text[0] == "Места осуществления образовательной деятельности":
-                        if ("<br>" in tds[1]):
-                            mood += tds[1].split("<br>")
-                        else:
-                            mood.append(tds_text[1])
+                    if (tds_text[0] == "Места осуществления образовательной деятельности"):
+                        mood += tds[1].__str__().replace('<td>', '').replace('</td>', '').split("<br/>")
+                    elif (tds_text[0] == "Место нахождения организации"):
+                        mno += tds[1].__str__().replace('<td>', '').replace('</td>', '').split("<br/>")
+        mno = unique(mno)
+        for i in mno:
+            data["Место нахождения организации"] += i + ";"
+        mno = (asplit(data["Место нахождения организации"])).split(';')
+        mno = unique(mno)
+        data["Место нахождения организации"] = ''
+        for i in mno:
+            data["Место нахождения организации"] += i + ";"
+        data["Место нахождения организации"] = data["Место нахождения организации"][:-1]
+
         mood = unique(mood)
         for i in mood:
-            data["Места осуществления образовательной деятельности"] += i
-
-        mood = (address_split.f(data["Места осуществления образовательной деятельности"])).split(";")
+            data["Места осуществления образовательной деятельности"] += i + ";"
+        mood = (asplit(data["Места осуществления образовательной деятельности"])).split(';')
         mood = unique(mood)
         data["Места осуществления образовательной деятельности"] = ''
         for i in mood:
