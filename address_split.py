@@ -15,7 +15,7 @@ def swap(address):
 def split_home(address):
     tmp = 0
     tmp_address = ''
-    address = address.strip(" ")
+    address = address.strip(' "')
     index_arr = re.findall(r'\d{5,9}', address)
     for i in range(len(index_arr)):
         if len(index_arr[i]) != 6:
@@ -30,40 +30,70 @@ def split_home(address):
     address_arr = address.split(';')
     tmp_address = ''
     for i in range(len(address_arr)-1):
-        curr_address = address_arr[i]
-        if curr_address[0:4].isdigit() == False:
+        curr_address = address_arr[i].strip(' ,')
+        if (curr_address[0:4].isdigit() == False) & (index_arr != []):
             curr_address = swap(curr_address)
-        pattern_1 = re.compile(r'д\.\s*\d+,*|дом\s*\d+,*|д\. № \d*,*|дом № \d*,*')
+        pattern_1 = re.compile(r'д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*')
         pattern_2 = re.compile(r',\s*\d+')
+        pattern_3 = re.compile(r',\s*\d+[а-яА-Я]+')
         house_arr = re.findall(pattern_1, curr_address)
         num_arr = re.findall(pattern_2, curr_address)
+        num_letter_arr = re.findall(pattern_3, curr_address)
         if (re.search(pattern_1, curr_address) != None) & (re.search(pattern_2, curr_address) == None):
             if len(house_arr) > 1:
                 template = curr_address[:curr_address.find(house_arr[0])]
                 for j in range(len(house_arr) - 1):
-                    tmp_address += template + curr_address[curr_address.find(house_arr[j]):curr_address.find(house_arr[j+1])] + ';'
-                tmp_address += template + curr_address[curr_address.find(house_arr[-1]):] + ';'
+                    tmp_address += template + curr_address[curr_address.find(house_arr[j]):curr_address.find(house_arr[j+1])] 
+                    tmp_address = tmp_address.strip(' ,') + ';'
+                tmp_address += template + curr_address[curr_address.find(house_arr[-1]):] 
+                tmp_address = tmp_address.strip(' ,') + ';'
             else:
-                tmp_address += curr_address + ';'
+                tmp_address += curr_address.strip(' ,') + ';'
         elif (re.search(pattern_1, curr_address) != None) & (re.search(pattern_2, curr_address) != None):
             if len(num_arr) >= 1:
                 template = curr_address[:curr_address.find(num_arr[0])]
-                tmp_address += template + ';'
+                k = 1
+                while template[-k].isdigit():
+                    k += 1
+                tmp_address += template.strip(' ,') + ';'
                 for j in range(len(num_arr) - 1):
-                    tmp_address += template[:-2] + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])] + ';'
-                tmp_address += template[:-2] + curr_address[curr_address.find(num_arr[-1])+1:] + ';'
+                    tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])]
+                    tmp_address = tmp_address.strip(' ,') + ';'
+                tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[-1])+1:] 
+                tmp_address = tmp_address.strip(' ,') + ';'
             else:
-                tmp_address += curr_address + ';'      
+                tmp_address += curr_address.strip(' ,') + ';'      
         elif (re.search(pattern_1, curr_address) == None) & (re.search(pattern_2, curr_address) != None): 
-            if len(num_arr) > 1:
+            if len(num_arr) >= 1:
                 template = curr_address[:curr_address.find(num_arr[0])]
+                k = 1
+                while template[-k].isdigit():
+                    k += 1
                 for j in range(len(num_arr) - 1):
-                    tmp_address += template + curr_address[curr_address.find(num_arr[j]):curr_address.find(num_arr[j+1])] + ';'
-                tmp_address += template + curr_address[curr_address.find(num_arr[-1]):] + ';'
+                    tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[j])+1:curr_address.find(num_arr[j+1])] 
+                    tmp_address = tmp_address.strip(' ,') + ';'
+                tmp_address += template[:-k] + curr_address[curr_address.find(num_arr[-1])+1:] 
+                tmp_address = tmp_address.strip(' ,') + ';'
             else:
-                tmp_address += curr_address + ';'
+                tmp_address += curr_address.strip(' ,') + ';'   
         elif (re.search(pattern_1, curr_address) == None) & (re.search(pattern_2, curr_address) == None):
-            tmp_address += curr_address + ';'
+            tmp_address += curr_address.strip(' ,') + ';'
+
+        if (re.search(pattern_3, curr_address) != None):
+            tmp_address = ''
+            if len(num_letter_arr) >= 1:
+                template = curr_address[:curr_address.find(num_letter_arr[0])]
+                k = 2
+                while template[-k].isdigit():
+                    k += 1
+                tmp_address += template.strip(' ,') + ';'
+                for j in range(len(num_letter_arr) - 1):
+                    tmp_address += template[:-k+1] + curr_address[curr_address.find(num_letter_arr[j])+1:curr_address.find(num_letter_arr[j+1])] 
+                    tmp_address = tmp_address.strip(' ,') + ';'
+                tmp_address += template[:-k+1] + curr_address[curr_address.find(num_letter_arr[-1])+1:] 
+                tmp_address = tmp_address.strip(' ,') + ';'
+            else:
+                tmp_address += curr_address.strip(' ,') + ';'  
     address = tmp_address
     return address
 
@@ -87,7 +117,7 @@ def f(address):
         tmp_address = ''
         for i in range(len(address_arr)):
             curr_address = address_arr[i]
-            pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,')
+            pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,')
             street_arr = re.findall(pattern, curr_address)
             if (len(street_arr) > 1):
                 template = curr_address[:curr_address.find(street_arr[0])]
@@ -99,7 +129,7 @@ def f(address):
         address = tmp_address
         address = split_home(address)
         return address
-    else:
+    elif index_arr != []:
         if len(index_arr) > 1:
             for i in index_arr[:-1]:
                 currInd = address.find(i, tmp+1) + 6
@@ -115,7 +145,7 @@ def f(address):
             street_arr = re.findall(pattern, curr_address)
             if (len(street_arr) > 1):
                 l = curr_address[curr_address.find(street_arr[-1]):]
-                house_num = re.search(r'\d+,|\d+\s', l).group(0)
+                house_num = re.search(r'\d+,|\d+\s|\d+\w*', l).group(0)
                 template = l[l.find(house_num) + len(house_num):].lstrip()
                 for j in range(len(street_arr) - 1):
                     tmp_address += curr_address[curr_address.find(street_arr[j]):curr_address.find(street_arr[j+1])] + template + ';'
@@ -125,4 +155,19 @@ def f(address):
         address = tmp_address
         address = split_home(address)
         return address
+    else:
+        curr_address = address
+        pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,')
+        street_arr = re.findall(pattern, curr_address)
+        if (len(street_arr) > 1):
+            template = curr_address[:curr_address.find(street_arr[0])]
+            for j in range(len(street_arr) - 1):
+                tmp_address += template + curr_address[curr_address.find(street_arr[j]):curr_address.find(street_arr[j+1])] + ';'
+            tmp_address += template + curr_address[curr_address.find(street_arr[-1]):] + ';'
+        else:
+            tmp_address += curr_address + ';'
+        address = tmp_address
+        address = split_home(address)
+        return address
+
 
