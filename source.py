@@ -47,16 +47,15 @@ def get_data(url):
         for tr in table1:
             tds = tr.find_all("td")   
             tds = [ele.text.strip() for ele in tds]
-            if (tds[0] == "Текущий статус лицензии" and tds[1] == "Не действует"): #start1
-                continue    #end1
+            if (tds[0] == "Текущий статус лицензии" and tds[1] == "Не действует"):
+                continue   
             if (tds[0] == "ОГРН") | (tds[0] == "ИНН") | (tds[0] == "КПП") | (tds[0] == "Полное наименование организации (ФИО индивидуального предпринимателя)") |\
-                (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Субьект РФ") | (tds[0] == "Место нахождения организации"):
+                (tds[0] == "Сокращенное наименование организации") | (tds[0] == "Субьект РФ"):
                 key = tds[0]
                 value = tds[1]
-                '''if (key == "Место нахождения организации" and len(re.findall(r'\d{4,9}', value.split(',')[0].replace(" ", ""))) == 0):
-                                                                    value = address_split.swap(value)'''
                 data[key] = value
         data["Места осуществления образовательной деятельности"] = ''
+        data["Место нахождения организации"] = ''
     except:
         with open("dont_working_urls.txt", "a+") as f:
             print("Ошибка! Не удалось открыть: http://isga.obrnadzor.gov.ru/rlic/details/" + url + "/")
@@ -78,9 +77,11 @@ def get_data(url):
                     tds = tr.find_all("td")
                     tds_text = [ele.text.strip() for ele in tds]
                     if (tds_text[0] == "Места осуществления образовательной деятельности"):
-                        mood += tds[1].__str__().replace('<td>', '').replace('</td>', '').split("<br/>")
+                        mood += tds[1].__str__().replace('<td>', '').replace('</td>', '').replace('\t', '').split("<br/>")
                     elif (tds_text[0] == "Место нахождения организации"):
-                        mno += tds[1].__str__().replace('<td>', '').replace('</td>', '').split("<br/>")
+                        mno += tds[1].__str__().replace('<td>', '').replace('</td>', '').replace('\t', '').split("<br/>")
+        #print(mno)
+        #print(mood)
         mno = unique(mno)
         for i in mno:
             data["Место нахождения организации"] += i + ";"
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()[:500]
+    urls = json_parse()[:100]
     fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Субьект РФ", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1

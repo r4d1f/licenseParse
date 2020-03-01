@@ -5,11 +5,17 @@ def f1(address):
     arr_address = split_address.split(";")
 
 def swap(address):
+    try:
+        ind = re.search(r"г\.|г\s|с\.|с\s|пос\.|пос\s|п\.|п\s|пгт\.|пгт\s", address).start()
+    except:
+        print("Ошибка! Не найден шаблон поиска населенного пункта для адреса: ", address)
+    address_street = address[:ind]
+    address = address[ind:]
     arr_address = address.rstrip(";").split(',')
     res = ''
     for i in range(len(arr_address)):
         res += arr_address[len(arr_address)-1-i] + ','
-    res = res[:-1].lstrip(" ") 
+    res = res+address_street[:-1].lstrip(" ")
     return res
 
 def split_home(address):
@@ -107,7 +113,7 @@ def f(address):
     for i in range(len(index_arr)):
         if len(index_arr[i]) != 6:
             index_arr[i] = index_arr[i][len(index_arr[i])-6:]
-    if (address[:6].isdigit()):
+    if (address[:5].replace(" ", "").isdigit()):
         if len(index_arr)>1:
             for i in index_arr[1:]:
                 currInd = address.find(i, tmp+1)
@@ -157,19 +163,21 @@ def f(address):
         address = tmp_address
         address = split_home(address)
         return address
-    else:
-        curr_address = address
-        pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,')
-        street_arr = re.findall(pattern, curr_address)
-        if (len(street_arr) > 1):
-            template = curr_address[:curr_address.find(street_arr[0])]
-            for j in range(len(street_arr) - 1):
-                tmp_address += template + curr_address[curr_address.find(street_arr[j]):curr_address.find(street_arr[j+1])] + ';'
-            tmp_address += template + curr_address[curr_address.find(street_arr[-1]):] + ';'
-        else:
-            tmp_address += curr_address + ';'
-        address = tmp_address
-        address = split_home(address)
-        return address
+    else:   #ЕСЛИ ИНДЕКС_АРР = []
+        '''print("!!!", index_arr)
+                                curr_address = address
+                                pattern = re.compile(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,')
+                                street_arr = re.findall(pattern, curr_address)
+                                if (len(street_arr) > 1):
+                                    template = curr_address[:curr_address.find(street_arr[0])]
+                                    for j in range(len(street_arr) - 1):
+                                        tmp_address += template + curr_address[curr_address.find(street_arr[j]):curr_address.find(street_arr[j+1])] + ';'
+                                    tmp_address += template + curr_address[curr_address.find(street_arr[-1]):] + ';'
+                                else:
+                                    tmp_address += curr_address + ';'
+                                address = tmp_address
+                                address = split_home(address)
+                                return address'''
+        return ''
 
 
