@@ -108,7 +108,14 @@ def get_data(url):
         #print(url)
         print('Ошибка:\n', traceback.format_exc())
     except:
-        print('Ошибка:\n', traceback.format_exc())
+        print("Ошибка! Не удалось открыть: http://isga.obrnadzor.gov.ru/rlic/supplement/" + url_to_full_address + "/")
+        #raise Exception("Ошибка! Не удалось открыть: http://isga.obrnadzor.gov.ru/rlic/supplement/" + url_to_full_address + "/") from None
+        with open("dont_working_urls.txt", "a+") as f:
+            #print("Ошибка! Не удалось открыть: http://isga.obrnadzor.gov.ru/rlic/supplement/" + url_to_full_address + "/")
+            f.write(url)
+            f.write("\n")
+        return
+        #print('Ошибка:\n', traceback.format_exc())
     return data
     
 def make_all(url):
@@ -118,21 +125,21 @@ def make_all(url):
 if __name__ == '__main__':
     file = open("dont_working_urls.txt", "w")
     file.close()
-
     start = datetime.datetime.now()
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()[:100]
+    urls = json_parse()     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
     fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Субьект РФ", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1
     col = 0
     count = 0
+    dw_counter = 0
     for i in range(len(fields)):
         worksheet.write(0, i, fields[i])
     while True:
-        with Pool(40) as p:
+        with Pool(7) as p:
             for result in p.map(make_all, urls):
                 count += 1
                 for i in fields:
@@ -141,21 +148,26 @@ if __name__ == '__main__':
                     except:
                         row -= 1
                         count -= 1
-                        #print(result)
                     col += 1
                 row += 1
                 col = 0
         file = open("dont_working_urls.txt", "r")
         file_data = file.read().splitlines()
+        #print("len(file_data) =========== ", len(file_data))
         if len(file_data) != 0:
-            urls = file_data
             file.close()
+            if (dw_counter == 20):
+                break
+            urls = file_data
             file = open("dont_working_urls.txt", "w")
             file.close()
+            dw_counter += 1
         else:
             file.close()
+            dw_counter += 1
             break
 
-
+    if (dw_counter == 20):
+        print("Не все адреса обработаны. Проверьте файл dont_working_urls.txt")
     print('Done!, count urls = ', count, '\nStart: ', start, '\nEnd: ', datetime.datetime.now())
     workbook.close()

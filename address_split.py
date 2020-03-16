@@ -5,18 +5,20 @@ def f1(address):
     arr_address = split_address.split(";")
 
 def swap(address):
+    address_org = address
     try:
-        ind = re.search(r"г\.|г\s|с\.|с\s|пос\.|пос\s|п\.|п\s|пгт\.|пгт\s", address).start()
+        ind = re.search(r"г\.|г\s|город\s|с\.|с\s|село\s|пос\.|пос\s|п\.|п\s|пгт\.|пгт\s|деревня\s|д\.", address).start()
+        address_street = address[:ind]
+        address = address[ind:]
+        arr_address = address.rstrip(";").split(',')
+        res = ''
+        for i in range(len(arr_address)):
+            res += arr_address[len(arr_address)-1-i] + ','
+        res = res+address_street[:-1].lstrip(" ")
+        return res
     except:
-        print("Ошибка! Не найден шаблон поиска населенного пункта для адреса: ", address)
-    address_street = address[:ind]
-    address = address[ind:]
-    arr_address = address.rstrip(";").split(',')
-    res = ''
-    for i in range(len(arr_address)):
-        res += arr_address[len(arr_address)-1-i] + ','
-    res = res+address_street[:-1].lstrip(" ")
-    return res
+        print("Ошибка! Не найден шаблон поиска населенного пункта для адреса: ", address_org)
+        return address_org
 
 def split_home(address):
     tmp = 0
@@ -37,7 +39,7 @@ def split_home(address):
     tmp_address = ''
     for i in range(len(address_arr)-1):
         curr_address = address_arr[i].strip(' ,')
-        if (curr_address[0:4].isdigit() == False) & (index_arr != []):
+        if (not(address[:5].replace(" ", "").isdigit() or address[0:6].lower() == "россия" or address[0:20].lower() == "российская федерация" or address[0:2].lower() == "рф")) & (index_arr != []):
             curr_address = swap(curr_address)
         pattern_1 = re.compile(r'д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*')
         pattern_2 = re.compile(r',\s*\d+|,\s*№\s*\d+')
@@ -108,12 +110,12 @@ def split_home(address):
 def f(address):
     tmp = 0
     tmp_address = ''
-    address = address.strip(" ")
+    address = address.strip()
     index_arr = re.findall(r'\d{6,9}', address)
     for i in range(len(index_arr)):
         if len(index_arr[i]) != 6:
             index_arr[i] = index_arr[i][len(index_arr[i])-6:]
-    if (address[:5].replace(" ", "").isdigit()):
+    if (address[:5].replace(" ", "").isdigit() or address[0:6].lower() == "россия" or address[0:20].lower() == "российская федерация" or address[0:2].lower() == "рф"):
         if len(index_arr)>1:
             for i in index_arr[1:]:
                 currInd = address.find(i, tmp+1)
