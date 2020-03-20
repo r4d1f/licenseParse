@@ -36,6 +36,7 @@ def asplit(address):
     address_arr = address.split(";")
     for i in address_arr:
         res += address_split.f(i)
+    #print(res)
     return res
 
 def get_data(url):
@@ -88,6 +89,8 @@ def get_data(url):
         mno = (asplit(data["Место нахождения организации"])).split(';')
         mno = unique(mno)
         data["Место нахождения организации"] = ''
+        
+
         for i in mno:
             data["Место нахождения организации"] += i + ";"
         data["Место нахождения организации"] = data["Место нахождения организации"][:-1]
@@ -130,6 +133,8 @@ if __name__ == '__main__':
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
     urls = json_parse()     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
+    #urls = ['d352f1b0-758f-474f-9a3a-815043654120']
+    #urls = ['947731b7-e576-b69c-99ba-d26e95db7f62']
     fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
     "Сокращенное наименование организации", "Субьект РФ", "Место нахождения организации", "Места осуществления образовательной деятельности"]
     row = 1
