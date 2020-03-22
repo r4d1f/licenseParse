@@ -132,7 +132,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()[0:4444]     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
+    urls = json_parse()     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
     #urls = ['d352f1b0-758f-474f-9a3a-815043654120']
     #urls = ['947731b7-e576-b69c-99ba-d26e95db7f62']
     fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
@@ -143,11 +143,11 @@ if __name__ == '__main__':
     dw_counter = 0
     for i in range(len(fields)):
         worksheet.write(0, i, fields[i])
-    for start_counter in range(0, len(urls)+1000, 1000):
+    for start_counter in range(0, len(urls)+5000, 5000):
         while True:
             with Pool(20) as p:
-                if (start_counter+1000 < len(urls)):
-                    end_counter = start_counter+1000
+                if (start_counter+5000 < len(urls)):
+                    end_counter = start_counter+5000
                 else:
                     end_counter = len(urls)
                 for result in p.map(make_all, urls[start_counter:end_counter]):
