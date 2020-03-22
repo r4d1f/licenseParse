@@ -132,7 +132,7 @@ if __name__ == '__main__':
     xlsxname = "License.xlsx"
     workbook = xlsxwriter.Workbook(xlsxname)
     worksheet = workbook.add_worksheet()
-    urls = json_parse()     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
+    urls = json_parse()[0:4444]     #для изменения количества лицензий изменить строку на urls = json_parse()[start:end], start и end - индексы
     #urls = ['d352f1b0-758f-474f-9a3a-815043654120']
     #urls = ['947731b7-e576-b69c-99ba-d26e95db7f62']
     fields = ["ОГРН", "ИНН", "КПП", "Полное наименование организации (ФИО индивидуального предпринимателя)", \
@@ -143,36 +143,41 @@ if __name__ == '__main__':
     dw_counter = 0
     for i in range(len(fields)):
         worksheet.write(0, i, fields[i])
-    while True:
-        with Pool(7) as p:
-            for result in p.map(make_all, urls):
-                count += 1
-                for i in fields:
-                    try:
-                        worksheet.write(row, col, result[i])
-                    except:
-                        row -= 1
-                        count -= 1
-                    col += 1
-                row += 1
-                col = 0
-        file = open("dont_working_urls.txt", "r")
-        file_data = file.read().splitlines()
-        #print("len(file_data) =========== ", len(file_data))
-        if len(file_data) != 0:
-            file.close()
-            if (dw_counter == 20):
+    for start_counter in range(0, len(urls)+1000, 1000):
+        while True:
+            with Pool(20) as p:
+                if (start_counter+1000 < len(urls)):
+                    end_counter = start_counter+1000
+                else:
+                    end_counter = len(urls)
+                for result in p.map(make_all, urls[start_counter:end_counter]):
+                    count += 1
+                    for i in fields:
+                        try:
+                            worksheet.write(row, col, result[i])
+                        except:
+                            row -= 1
+                            count -= 1
+                        col += 1
+                    row += 1
+                    col = 0
+            file = open("dont_working_urls.txt", "r")
+            file_data = file.read().splitlines()
+            #print("len(file_data) =========== ", len(file_data))
+            if len(file_data) != 0:
+                file.close()
+                if (dw_counter == 5):
+                    break
+                urls = file_data
+                file = open("dont_working_urls.txt", "w")
+                file.close()
+                dw_counter += 1
+            else:
+                file.close()
+                dw_counter += 1
                 break
-            urls = file_data
-            file = open("dont_working_urls.txt", "w")
-            file.close()
-            dw_counter += 1
-        else:
-            file.close()
-            dw_counter += 1
-            break
 
-    if (dw_counter == 20):
+    if (dw_counter == 5):
         print("Не все адреса обработаны. Проверьте файл dont_working_urls.txt")
     print('Done!, count urls = ', count, '\nStart: ', start, '\nEnd: ', datetime.datetime.now())
     workbook.close()
