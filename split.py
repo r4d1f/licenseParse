@@ -2,10 +2,14 @@ import pandas as pd
 import re
 
 def address_split(adr):
-    adr_arr = adr.split(";")
+    res = []
+    try:
+        adr_arr = adr.split(";")
+    except AttributeError:
+        res = [{"ind":"", "country":"","region":"", "locality":"", "street_house":"", "other":""}]
+        return res
     if adr_arr[-1] == '':
         adr_arr = adr_arr[:-1]
-    res = []
     for el in adr_arr:
         el_arr = el.split(",")
         for i in range(len(el_arr)):
@@ -57,3 +61,4 @@ def get_ogrn_address(name_xlsx, name_page):
         res_split = address_split(address)
         ogrn_address.update({ogrn:res_split})
     return ogrn_address
+
