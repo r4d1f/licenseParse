@@ -23,24 +23,37 @@ def address_split(adr):
             dict_adr["country"] = "-"
             haveCountry = 0
         dict_adr["region"] = el_arr[1+haveCountry]
-        if (re.match(r"г\.|г\s|город\s", el_arr[2+haveCountry].lower())):
-            dict_adr["locality"] = el_arr[2+haveCountry]
-            haveNotCity = 0
-        else:
-            dict_adr["locality"] = el_arr[2+haveCountry] + "," + el_arr[3+haveCountry]
-            haveNotCity = 1
         try:
-            if (re.match(r"д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*", el_arr[4 + haveCountry + haveNotCity])):
+            if (re.match(r"г\.|г\s|город\s", el_arr[2+haveCountry].lower())):
+                dict_adr["locality"] = el_arr[2+haveCountry]
+                haveNotCity = 0
+            else:
+                dict_adr["locality"] = el_arr[2+haveCountry] + "," + el_arr[3+haveCountry]
+                haveNotCity = 1
+        except IndexError:
+            dict_adr["locality"] = ""
+            dict_adr["street_house"] = ""
+            dict_adr["other"] = ""
+            res.append(dict_adr)
+            continue
+        try:
+            flag = 0
+            if (re.match(r"д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*", el_arr[3 + haveCountry + haveNotCity])):
+                flag = 1
                 dict_adr["street_house"] = el_arr[3+ haveCountry + haveNotCity] + "," + el_arr[4 + haveCountry + haveNotCity]
                 haveHouse = 1
-            elif (re.match(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,', el_arr[4 + haveCountry + haveNotCity])):
+            elif (re.match(r'ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|пер\.\s*\S*,|пл\.\s*\S*,|переулок\s*\S*,|просп\.\s*\S*,|туп\.\s*\S*,|пр-кт\.\s*\S*,', el_arr[3 + haveCountry + haveNotCity])):
+                flag =1
                 dict_adr["street_house"] = el_arr[3+ haveCountry + haveNotCity] + "," + el_arr[4 + haveCountry + haveNotCity]
                 haveHouse = 1
             else:
                 dict_adr["street_house"] = el_arr[3+ haveCountry + haveNotCity]
                 haveHouse = 0
         except IndexError:
-            dict_adr["street_house"] = el_arr[3+ haveCountry + haveNotCity]
+            if (flag==1):
+                dict_adr["street_house"] = el_arr[3+ haveCountry + haveNotCity]
+            else:
+                dict_adr["street_house"] = ""
             dict_adr["other"] = ""
             res.append(dict_adr)
             continue
