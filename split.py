@@ -1,8 +1,11 @@
 import pandas as pd
 import re
+import numpy as np
 
 def address_split(adr):
     res = []
+    if type(adr) == float:
+        return [{"ind":"", "country":"","region":"", "locality":"", "street_house":"", "other":""}]
     try:
         adr_arr = adr.split(";")
     except AttributeError:
@@ -68,10 +71,12 @@ def address_split(adr):
 def get_ogrn_address(name_xlsx, name_page):
     df = pd.read_excel(name_xlsx, name_page, usecols=[0, 7])
     ogrn_address = {}
+    ogrn_arr = []
     for i in range(int(df.size/2)):
         ogrn = df.iat[i, 0]
+        ogrn_arr.append(ogrn)
         address = df.iat[i, 1]
         res_split = address_split(address)
         ogrn_address.update({ogrn:res_split})
-    return ogrn_address
+    return ogrn_arr, ogrn_address
 
