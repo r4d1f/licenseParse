@@ -1,8 +1,8 @@
 import os
 import pypyodbc
 import split
-import pandas as pd
-
+import ta
+import coordinates
 
 def create_db(path_to_directory):
     db_path = path_to_directory + '/DB.mdb'
@@ -53,43 +53,33 @@ def split_buildings(buildings):
 ID = 1
 ID_buildings = 1
 
-def add_data(db, full_name, short_name, address_main, buildings, ogrn, split_addr):
+def add_data(db, full_name, short_name, address_main, buildings, ogrn, split_addr, region):
     global ID, ID_buildings
     for i in range(len(full_name)):
         db.cursor().execute("INSERT INTO address VALUES(?, ?, ?, ?)", (ID, full_name[i], short_name[i], address_main[i]))
-        for k in range(len(split_addr[ogrn[i]])):
+        for k in range(len(split_addr[i])):
+            if (split_addr[i][k]['ind'] == '') & (split_addr[i][k]['locality'] == '') & \
+            (split_addr[i][k]['street_house'] == '') & (split_addr[i][k]['other'] == ''):
+                continue
             db.cursor().execute("INSERT INTO split_address VALUES(?, ?, ?, ?, ?, ?, ?, ?)", \
-                (ID, str(ogrn[i]), split_addr[ogrn[i]][k]['ind'], split_addr[ogrn[i]][k]['country'],  split_addr[ogrn[i]][k]['region'], \
-                split_addr[ogrn[i]][k]['locality'], split_addr[ogrn[i]][k]['street_house'], split_addr[ogrn[i]][k]['other']))     
+                (ID, str(ogrn[i]), split_addr[i][k]['ind'], 'Россия',  region[i], \
+                split_addr[i][k]['locality'], split_addr[i][k]['street_house'], split_addr[i][k]['other']))
         for j in range(len(buildings[i][0])-1):
             db.cursor().execute("INSERT INTO buildings VALUES(?, ?, ?, ?, ?, ?)", (ID_buildings, ID, 'False', buildings[i][0][j], '', ''))
             ID_buildings += 1
         ID += 1
     db.commit()
     db.close()
-
+#split_addr[i][k]['region']
 if __name__ == '__main__':
-    name_xlsx = "License2.xlsx"
-    name_page = "Лист1"
-    df = pd.read_excel(name_xlsx, name_page, usecols=[0, 1, 3, 4, 6, 7])
     path_to_directory = os.getcwd()
     db = create_db(path_to_directory)
     create_table(db)
-    ogrn = []
-    inn = []
-    full_name = []
-    short_name = []
-    address_main = []
-    buildings = []
-    for i in range(len(df)):
-        ogrn.append(df.iat[i, 0])
-        inn.append(df.iat[i, 1])
-        full_name.append(df.iat[i, 2])
-        short_name.append(df.iat[i, 3])
-        address_main.append(df.iat[i, 4])
-        buildings.append([df.iat[i, 5]])
-
+    ogrn, inn, kpp, full_name, short_name, address_main, buildings, region = ta.f()
+    split_addr = split.get_ogrn_address(buildings)
     buildings = split_buildings(buildings)
-    ogrn_split_addr, split_addr = split.get_ogrn_address("License2.xlsx", "Лист1")
-    add_data(db, full_name, short_name, address_main, buildings, ogrn_split_addr, split_addr)
-   
+    #coord = coordinates.f(buildings)
+    #print(coord)    
+    add_data(db, full_name, short_name, address_main, buildings, ogrn, split_addr, region)
+
+    

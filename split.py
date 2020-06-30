@@ -4,8 +4,8 @@ import numpy as np
 
 def address_split(adr):
     res = []
-    if type(adr) == float:
-        return [{"ind":"", "country":"","region":"", "locality":"", "street_house":"", "other":""}]
+    #if (type(adr) == float) | (adr == ''):
+    #    return [{"ind":"", "country":"","region":"", "locality":"", "street_house":"", "other":""}]
     try:
         adr_arr = adr.split(";")
     except AttributeError:
@@ -15,6 +15,8 @@ def address_split(adr):
         adr_arr = adr_arr[:-1]
     for el in adr_arr:
         el_arr = el.split(",")
+        if len(el_arr) == 1:
+            return [{"ind":el_arr[0], "country":"","region":"", "locality":"", "street_house":"", "other":""}]
         for i in range(len(el_arr)):
             el_arr[i] = el_arr[i].strip()
         dict_adr = dict.fromkeys(["ind", "country","region", "locality", "street_house", "other"])
@@ -68,7 +70,7 @@ def address_split(adr):
     return res
          
         
-def get_ogrn_address(name_xlsx, name_page):
+'''def get_ogrn_address(name_xlsx, name_page):
     df = pd.read_excel(name_xlsx, name_page, usecols=[0, 7])
     ogrn_address = {}
     ogrn_arr = []
@@ -76,7 +78,15 @@ def get_ogrn_address(name_xlsx, name_page):
         ogrn = df.iat[i, 0]
         ogrn_arr.append(ogrn)
         address = df.iat[i, 1]
+        print(ogrn, '\t', address)
         res_split = address_split(address)
         ogrn_address.update({ogrn:res_split})
-    return ogrn_arr, ogrn_address
+    return ogrn_arr, ogrn_address'''
 
+def get_ogrn_address(address):
+    res_split = []
+    for i in range(len(address)):
+        if (type(address) == float) | (address == ''):
+            continue 
+        res_split.append(address_split(address[i][0]))
+    return res_split
