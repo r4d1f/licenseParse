@@ -3,7 +3,8 @@ import numpy as np
 
 
 def f():
-    df = pd.read_excel("License.xlsx", "Sheet1", usecols=[0, 1, 2, 3, 4, 6, 7])
+    #LicenseMIREA
+    df = pd.read_excel("License3.xlsx", "Лист1", usecols=[0, 1, 2, 3, 4, 6, 7])
     ogrn = []
     inn = []
     kpp = []
@@ -19,19 +20,23 @@ def f():
         short_name.append(df.iat[i, 4])
         address_main.append(df.iat[i, 5])
         buildings.append([df.iat[i, 6]])
-    
-    df_vo = pd.read_excel("vo_orgs.xlsx", "Лист2", usecols=[5, 10, 13, 14, 15])
+    #print(buildings[len(buildings)-1])
+    df_vo = pd.read_excel("vo_orgs.xlsx", "Лист2", usecols=[1, 3, 5, 10, 13, 14, 15])
+    vo_org_id = []
+    vo_full_name = []
     vo_ogrn = []
     vo_inn = []
     vo_kpp = []
     vo_region = []
     vo_main_addr = []
     for i in range(len(df_vo)):
-        vo_region.append(df_vo.iat[i, 0])
-        vo_main_addr.append(df_vo.iat[i, 1])
-        vo_inn.append(df_vo.iat[i, 2])
-        vo_kpp.append(df_vo.iat[i, 3])
-        vo_ogrn.append(df_vo.iat[i, 4])
+        vo_org_id.append(df_vo.iat[i, 0])
+        vo_full_name.append(df_vo.iat[i, 1])
+        vo_region.append(df_vo.iat[i, 2])
+        vo_main_addr.append(df_vo.iat[i, 3])
+        vo_inn.append(df_vo.iat[i, 4])
+        vo_kpp.append(df_vo.iat[i, 5])
+        vo_ogrn.append(df_vo.iat[i, 6])
     
     co = 0
     for i in range(len(vo_inn)):
@@ -48,6 +53,7 @@ def f():
         except:
             vo_kpp[i] = 0
 
+    res_org_id = []
     res_ogrn = []
     res_inn = []
     res_kpp = []
@@ -75,6 +81,7 @@ def f():
                     if np.isnan(address_main[i]):
                         address_main[i] = vo_main_addr[j]
                 co += 1
+                res_org_id.append(int(vo_org_id[j]))
                 res_ogrn.append(ogrn[i])
                 res_inn.append(inn[i])
                 res_kpp.append(kpp[i])
@@ -83,9 +90,12 @@ def f():
                 res_address_main.append(address_main[i])
                 res_buildings.append(buildings[i])
                 res_region.append(vo_region[j])
-                    
+                break
+    #print(res_buildings[len(res_buildings)-1])  
+    #& (vo_full_name[j] == full_name[i])            
     print(co)
-    return (res_ogrn, res_inn, res_kpp, res_full_name, res_short_name, res_address_main, res_buildings, res_region)
+    #print(res_org_id)
+    return (res_org_id, res_ogrn, res_inn, res_kpp, res_full_name, res_short_name, res_address_main, res_buildings, res_region)
     
 if __name__ == '__main__':
     f()
