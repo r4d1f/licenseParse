@@ -47,36 +47,51 @@ def address_split(adr):
             dict_adr["other"] = ""
             res.append(dict_adr)
             continue
-        okrug = 0
+        some_ins = 0
         try:
-            if (re.search(r'.*округ.*', el_arr[2 + haveCountry + haveNotCity+haveRegion])):
-                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion]
-                okrug = 1
+            if (re.search(r'.*округ.*', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
+            if (re.search(r'р-н', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
+            if (re.search(r'ж\.s*р\.', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
+            if (re.search(r'жилрайон', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
+            if (re.search(r'район', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
+            if (re.search(r'р\.\s*п\.', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
+                dict_adr["locality"] += ", " + el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins]
+                some_ins += 1
         except:
             pass
         try:
             flag = 0
-            if (re.search(r"д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*", el_arr[2 + haveCountry + haveNotCity+haveRegion+okrug])):
+            if (re.search(r"д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*", el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
                 flag = 1
-                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+okrug] + "," + el_arr[3 + haveCountry + haveNotCity+haveRegion+okrug]
+                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+some_ins] + "," + el_arr[3 + haveCountry + haveNotCity+haveRegion+some_ins]
                 haveHouse = 1
-            elif (re.search(r'улица\s*|ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|ул\.|шоссе|ш\.|переулок|пер\.|пер\.\s*\S*|пл\.\s*\S*|пл\.|б-р|Б\.|переулок|просп\.|проспект|проезд|пр\.|пр-кт|пр-т|пр-кт\|туп\.*', el_arr[2 + haveCountry + haveNotCity+haveRegion+okrug])):
+            elif (re.search(r'улица\s*|ул\.\s*\S*,|ул\.\s*\S*\s*\S*\s*\S*|ул\.\s*\S*\s*\S*\s*\S*,|ул\.|шоссе|ш\.|переулок|пер\.|пер\.\s*\S*|пл\.\s*\S*|пл\.|б-р|Б\.|переулок|просп\.|проспект|проезд|пр\.|пр-кт|пр-т|пр-кт\|туп\.*', el_arr[2 + haveCountry + haveNotCity+haveRegion+some_ins])):
                 flag =1
-                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+okrug] + "," + el_arr[3 + haveCountry + haveNotCity+haveRegion+okrug]
+                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+some_ins] + "," + el_arr[3 + haveCountry + haveNotCity+haveRegion+some_ins]
                 haveHouse = 1
             else:
-                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+okrug]
+                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+some_ins]
                 haveHouse = 0
         except IndexError:
             if (flag==1):
-                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+okrug]
+                dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion+some_ins]
             else:
                 dict_adr["street_house"] = ""
             dict_adr["other"] = ""
             res.append(dict_adr)
             continue
         dict_adr["other"] = ""
-        for i in el_arr[3 + haveCountry + haveNotCity + haveHouse+haveRegion+okrug:]:
+        for i in el_arr[3 + haveCountry + haveNotCity + haveHouse+haveRegion+some_ins:]:
             dict_adr["other"] += i + ","
         dict_adr["other"] = dict_adr["other"][:-1]
         res.append(dict_adr)
