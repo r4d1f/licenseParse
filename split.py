@@ -49,7 +49,6 @@ def address_split(adr):
             continue
         try:
             flag = 0
-            print(el_arr[2 + haveCountry + haveNotCity+haveRegion])
             if (re.match(r"д\.\s*\d+,*|дом\s*\d+,*|д\.\s*№\s*\d*,*|дом № \d*,*", el_arr[2 + haveCountry + haveNotCity+haveRegion])):
                 flag = 1
                 dict_adr["street_house"] = el_arr[2+ haveCountry + haveNotCity+haveRegion] + "," + el_arr[3 + haveCountry + haveNotCity+haveRegion]
