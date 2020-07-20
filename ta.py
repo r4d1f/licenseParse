@@ -4,7 +4,7 @@ import numpy as np
 
 def f():
     #LicenseMIREA
-    df = pd.read_excel("License3.xlsx", "Лист1", usecols=[0, 1, 2, 3, 4, 6, 7])
+    df = pd.read_excel("License_all2.xlsx", "Sheet1", usecols=[0, 1, 2, 3, 4, 6, 7])
     ogrn = []
     inn = []
     kpp = []
@@ -91,6 +91,19 @@ def f():
                 res_buildings.append(buildings[i])
                 res_region.append(vo_region[j])
                 break
+            elif((vo_inn[j] == inn[i]) & (vo_ogrn[j] == ogrn[i])):
+                if (type(address_main[i]) != float):
+                    co += 1
+                    res_org_id.append(int(vo_org_id[j]))
+                    res_ogrn.append(ogrn[i])
+                    res_inn.append(inn[i])
+                    res_kpp.append(kpp[i])
+                    res_full_name.append(full_name[i])
+                    res_short_name.append(short_name[i])
+                    res_address_main.append(address_main[i])
+                    res_buildings.append(buildings[i])
+                    res_region.append(vo_region[j])
+                    break
     #print(res_buildings[len(res_buildings)-1])  
     #& (vo_full_name[j] == full_name[i])            
     print(co)

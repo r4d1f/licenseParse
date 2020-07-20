@@ -62,7 +62,8 @@ def update_db(DataBase, res_buildings, split_addr):
     db.commit()
 
 if __name__ == '__main__':
-    DataBase = 'D:/W/task4/licenseParse/DB.mdb'
+    #DataBase = 'D:/W/task4/licenseParse/DB.mdb'
+    DataBase = "C:\\Users\\acer2\\Desktop\\Работа\\licenseParse\\DB.mdb"
     Table1 = 'buildings'
     buildings = get_data_from_db(DataBase, Table1)
     buildings = make_standard_addr(buildings)
